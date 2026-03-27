@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arifilham.liveness_detection.models.LivenessStatus
 
 @Composable
 fun LivenessCameraView(viewModel: LivenessViewModel) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val livenessState by viewModel.livenessResult.collectAsState()
 
@@ -25,7 +24,10 @@ fun LivenessCameraView(viewModel: LivenessViewModel) {
         }
     )
     Text(
-        text = "Blink: ${livenessState.blinkDetected}",
+        text = when (livenessState.status) {
+            LivenessStatus.BLINK -> "Blink: true"
+            else -> "Blink: false"
+        },
         modifier = Modifier.padding(16.dp)
     )
 }

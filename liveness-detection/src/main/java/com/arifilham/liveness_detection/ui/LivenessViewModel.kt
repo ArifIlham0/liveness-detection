@@ -15,7 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 class LivenessViewModel(application: Application) : AndroidViewModel(application) {
     private val faceMesh = MediaPipeFaceMesh(application)
     private val processor = LivenessProcessor(faceMesh)
-    private val _livenessResult = MutableStateFlow(LivenessResult(false, null, false))
+    private val _livenessResult = MutableStateFlow(
+        LivenessResult(
+            status = com.arifilham.liveness_detection.models.LivenessStatus.NO_FACE,
+            message = "Wajah tidak terdeteksi, mohon arahkan kamera ke wajah"
+        )
+    )
     val livenessResult: StateFlow<LivenessResult> = _livenessResult
     private val analyzer = FrameAnalyzer(processor) { result ->
         _livenessResult.value = result

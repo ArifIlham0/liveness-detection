@@ -1,15 +1,12 @@
 package com.arifilham.livenessdetectionlibrary
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arifilham.liveness_detection.ui.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.arifilham.liveness_detection.models.LivenessStatus
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +30,10 @@ class MainActivity : ComponentActivity() {
             val viewModel: LivenessViewModel = viewModel()
             val livenessResult by viewModel.livenessResult.collectAsState()
 
+            if (livenessResult.status == LivenessStatus.COMPLETE) {
+                startActivity(Intent(this, SuccessActivity::class.java))
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 LivenessCameraView(viewModel = viewModel)
 
@@ -39,20 +41,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter).padding(top = 64.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (livenessResult.pose == null) {
-                        Text(
-                            text = "Wajah tidak terdeteksi, mohon arahkan kamera ke wajah",
-                            color = Color.Red
-                        )
-                    } else {
-                        val pose = livenessResult.pose!!
-                        when {
-                            pose.yaw > 20f -> Text("Anda sedang menoleh ke Kanan", color = Color.Green)
-                            pose.yaw < -20f -> Text("Anda sedang menoleh ke Kiri", color = Color.Green)
-                            livenessResult.blinkDetected -> Text("Berkedip Terdeteksi!", color = Color.Cyan)
-                            else -> Text("Posisi Bagus, Tetap Diam...", color = Color.White)
+                    Text(
+                        text = livenessResult.message ?: "",
+                        color = when (livenessResult.status) {
+                            LivenessStatus.NO_FACE -> Color.Red
+                            LivenessStatus.BLINK -> Color.Cyan
+                            LivenessStatus.TURN_LEFT,
+                            LivenessStatus.TURN_RIGHT -> Color.Green
+                            LivenessStatus.GOOD -> Color.White
+                            LivenessStatus.COMPLETE -> Color.Magenta
                         }
-                    }
+                    )
                 }
             }
         }
