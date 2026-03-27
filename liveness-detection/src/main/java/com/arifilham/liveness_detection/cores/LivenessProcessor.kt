@@ -34,11 +34,12 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
 
         if (blink && !blinked) blinked = true
 
+        val YAW_THRESHOLD = 0.5f // radian, sekitar 28 derajat
         var turnStatus: LivenessStatus? = null
-        if (pose.yaw > 0.35f) {
+        if (pose.yaw > YAW_THRESHOLD) {
             if (!turnedRight) turnedRight = true
             turnStatus = LivenessStatus.TURN_RIGHT
-        } else if (pose.yaw < -0.35f) {
+        } else if (pose.yaw < -YAW_THRESHOLD) {
             if (!turnedLeft) turnedLeft = true
             turnStatus = LivenessStatus.TURN_LEFT
         }
@@ -49,12 +50,12 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
             lastTurnTimestamp = now
             return LivenessResult(
                 status = turnStatus,
-                message = if (turnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan" else "Anda sedang menoleh ke Kiri"
+                message = if (turnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan (yaw: %.2f)".format(pose.yaw) else "Anda sedang menoleh ke Kiri (yaw: %.2f)".format(pose.yaw)
             )
         } else if (lastTurnStatus != null && now - lastTurnTimestamp < TURN_HOLD_MS) {
             return LivenessResult(
                 status = lastTurnStatus!!,
-                message = if (lastTurnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan" else "Anda sedang menoleh ke Kiri"
+                message = if (lastTurnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan (yaw: %.2f)".format(pose.yaw) else "Anda sedang menoleh ke Kiri (yaw: %.2f)".format(pose.yaw)
             )
         } else {
             lastTurnStatus = null
@@ -68,6 +69,6 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
             return LivenessResult(LivenessStatus.BLINK, "Berkedip Terdeteksi!")
         }
 
-        return LivenessResult(LivenessStatus.GOOD, "Posisi Bagus, Tetap Diam...")
+        return LivenessResult(LivenessStatus.GOOD, "Posisi Bagus, Tetap Diam... (yaw: %.2f)".format(pose.yaw))
     }
 }
