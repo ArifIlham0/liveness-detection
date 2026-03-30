@@ -28,11 +28,11 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
         val landmarks = LandmarkUtils.extract(result)
         if (landmarks.isEmpty()) {
             if (lastPoseStatus == LivenessStatus.TURN_LEFT || lastPoseStatus == LivenessStatus.TURN_RIGHT) {
-                return LivenessResult(LivenessStatus.NO_FACE, "Wajah terlalu miring, mohon hadapkan wajah sedikit ke kamera")
+                return LivenessResult(LivenessStatus.NO_FACE, "Face is too tilted")
             }
             lastTurnStatus = null
             lastTurnTimestamp = 0L
-            return LivenessResult(LivenessStatus.NO_FACE, "Wajah tidak terdeteksi, mohon arahkan kamera ke wajah")
+            return LivenessResult(LivenessStatus.NO_FACE, "Face not detected")
         }
 
         val ear = EyeAspectRatio.calculate(LandmarkUtils.leftEye(landmarks))
@@ -64,25 +64,25 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
             lastTurnTimestamp = now
             return LivenessResult(
                 status = turnStatus,
-                message = if (turnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan (yaw: %.2f)".format(pose.yaw) else "Anda sedang menoleh ke Kiri (yaw: %.2f)".format(pose.yaw)
+                message = if (turnStatus == LivenessStatus.TURN_RIGHT) "You are looking to the right (yaw: %.2f)".format(pose.yaw) else "You are looking to the left (yaw: %.2f)".format(pose.yaw)
             )
         } else if (lastTurnStatus != null && now - lastTurnTimestamp < TURN_HOLD_MS) {
             return LivenessResult(
                 status = lastTurnStatus!!,
-                message = if (lastTurnStatus == LivenessStatus.TURN_RIGHT) "Anda sedang menoleh ke Kanan (yaw: %.2f)".format(pose.yaw) else "Anda sedang menoleh ke Kiri (yaw: %.2f)".format(pose.yaw)
+                message = if (lastTurnStatus == LivenessStatus.TURN_RIGHT) "You are looking to the right (yaw: %.2f)".format(pose.yaw) else "You are looking to the left (yaw: %.2f)".format(pose.yaw)
             )
         } else {
             lastTurnStatus = null
         }
 
         if (blinked && turnedLeft && turnedRight) {
-            return LivenessResult(LivenessStatus.COMPLETE, "Liveness check selesai!")
+            return LivenessResult(LivenessStatus.COMPLETE, "Liveness check complete!")
         }
 
         if (blink && !turnedLeft) {
-            return LivenessResult(LivenessStatus.BLINK, "Berkedip Terdeteksi!")
+            return LivenessResult(LivenessStatus.BLINK, "Blinking Detected!")
         }
 
-        return LivenessResult(LivenessStatus.GOOD, "Posisi Bagus, Tetap Diam... (yaw: %.2f)".format(pose.yaw))
+        return LivenessResult(LivenessStatus.GOOD, "Good Position, Stay Still... (yaw: %.2f)".format(pose.yaw))
     }
 }
