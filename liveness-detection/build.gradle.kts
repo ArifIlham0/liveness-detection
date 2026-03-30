@@ -40,6 +40,12 @@ android {
         singleVariant("release")
     }
 
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
 //    sourceSets {
 //        getByName("main") {
 //            assets.srcDirs("src/main/assets")
@@ -58,6 +64,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.5.3")
     implementation("androidx.camera:camera-view:1.5.3")
     implementation("com.google.mediapipe:tasks-vision:0.20230731")
+    implementation(":opencv-4.12.0@aar")
 }
 
 afterEvaluate {
