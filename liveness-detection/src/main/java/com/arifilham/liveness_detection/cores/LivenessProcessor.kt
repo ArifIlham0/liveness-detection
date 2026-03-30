@@ -9,7 +9,8 @@ import com.arifilham.liveness_detection.visions.MediaPipeFaceMesh
 
 class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
     private val blinkDetector = BlinkDetector()
-    private val poseEstimator = HeadPoseEstimator()
+    private val poseEstimator = OpenCVHeadPoseEstimator()
+    private val fallbackPoseEstimator = HeadPoseEstimator()
 
     private var blinked = false
     private var turnedLeft = false
@@ -36,11 +37,16 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
 
         val ear = EyeAspectRatio.calculate(LandmarkUtils.leftEye(landmarks))
         val blink = blinkDetector.detect(ear)
-        val pose = poseEstimator.estimate(landmarks)
+
+        val pose = try {
+            poseEstimator.estimate(landmarks)
+        } catch (_: Throwable) {
+            fallbackPoseEstimator.estimate(landmarks)
+        }
 
         if (blink && !blinked) blinked = true
 
-        val YAW_THRESHOLD = 0.2f
+        val YAW_THRESHOLD = 0.3f
         var turnStatus: LivenessStatus? = null
         if (pose.yaw > YAW_THRESHOLD) {
             if (!turnedRight) turnedRight = true

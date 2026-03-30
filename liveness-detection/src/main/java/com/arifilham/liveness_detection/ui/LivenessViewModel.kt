@@ -8,11 +8,16 @@ import com.arifilham.liveness_detection.analyzers.FrameAnalyzer
 import com.arifilham.liveness_detection.cameras.CameraController
 import com.arifilham.liveness_detection.cores.LivenessProcessor
 import com.arifilham.liveness_detection.models.LivenessResult
+import com.arifilham.liveness_detection.utils.OpenCVUtils
 import com.arifilham.liveness_detection.visions.MediaPipeFaceMesh
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class LivenessViewModel(application: Application) : AndroidViewModel(application) {
+    init {
+        OpenCVUtils.initialize()
+    }
+
     private val faceMesh = MediaPipeFaceMesh(application)
     private val processor = LivenessProcessor(faceMesh)
     private val _livenessResult = MutableStateFlow(
