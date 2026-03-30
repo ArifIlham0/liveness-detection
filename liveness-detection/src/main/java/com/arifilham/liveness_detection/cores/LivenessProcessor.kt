@@ -17,12 +17,18 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
     private var lastTurnStatus: LivenessStatus? = null
     private var lastTurnTimestamp: Long = 0L
 
+    private var lastPose: Float? = null
+    private var lastPoseStatus: LivenessStatus? = null
+
     private val TURN_HOLD_MS = 1000L
 
     fun processFrame(bitmap: Bitmap): LivenessResult {
         val result = faceMesh.detect(bitmap)
         val landmarks = LandmarkUtils.extract(result)
         if (landmarks.isEmpty()) {
+            if (lastPoseStatus == LivenessStatus.TURN_LEFT || lastPoseStatus == LivenessStatus.TURN_RIGHT) {
+                return LivenessResult(LivenessStatus.NO_FACE, "Wajah terlalu miring, mohon hadapkan wajah sedikit ke kamera")
+            }
             lastTurnStatus = null
             lastTurnTimestamp = 0L
             return LivenessResult(LivenessStatus.NO_FACE, "Wajah tidak terdeteksi, mohon arahkan kamera ke wajah")
@@ -34,7 +40,7 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
 
         if (blink && !blinked) blinked = true
 
-        val YAW_THRESHOLD = 0.5f // radian, sekitar 28 derajat
+        val YAW_THRESHOLD = 0.2f
         var turnStatus: LivenessStatus? = null
         if (pose.yaw > YAW_THRESHOLD) {
             if (!turnedRight) turnedRight = true
@@ -43,6 +49,8 @@ class LivenessProcessor(private val faceMesh: MediaPipeFaceMesh) {
             if (!turnedLeft) turnedLeft = true
             turnStatus = LivenessStatus.TURN_LEFT
         }
+        lastPose = pose.yaw
+        lastPoseStatus = turnStatus
 
         val now = System.currentTimeMillis()
         if (turnStatus != null) {

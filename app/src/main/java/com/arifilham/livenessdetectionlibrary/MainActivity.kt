@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                                 color = when (livenessResult.status) {
                                     LivenessStatus.NO_FACE -> Color.Red
                                     LivenessStatus.BLINK -> Color.Cyan
-                                    LivenessStatus.TURN_LEFT,
+                                    LivenessStatus.TURN_LEFT -> Color.Green
                                     LivenessStatus.TURN_RIGHT -> Color.Green
                                     LivenessStatus.GOOD -> Color.White
                                     LivenessStatus.COMPLETE -> Color.Magenta

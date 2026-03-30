@@ -13,7 +13,11 @@ class HeadPoseEstimator {
         val eyeCenterX = (leftEye.x + rightEye.x) / 2f
         val eyeCenterY = (leftEye.y + rightEye.y) / 2f
         val eyeDist = rightEye.x - leftEye.x
-        val yaw = (nose.x - eyeCenterX) / eyeDist
+        if (kotlin.math.abs(eyeDist) < 1.0f) {
+            return FacePose(0f, 0f, 0f)
+        }
+        var yaw = (nose.x - eyeCenterX) / eyeDist
+        yaw = yaw.coerceIn(-1f, 1f)
         val pitch = nose.y - eyeCenterY
         val roll = atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x)
 
