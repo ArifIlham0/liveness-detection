@@ -24,11 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SuccessActivity"
-            android:exported="false"
-            android:label="Liveness Success"
-            android:theme="@style/Theme.LivenessDetectionLibrary" />
     </application>
 
 </manifest>
